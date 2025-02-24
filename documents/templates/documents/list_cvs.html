@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CV List</title>
+</head>
+<body>
+    <h1>Uploaded CVs</h1>
+    
+    <a href="{% url 'upload_cv' %}">
+        <button>Upload New CV</button>
+    </a>
+
+    <a href="{% url 'chatbot' %}">
+        <button>Go to Chatbot</button>
+    </a>
+    
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Actions</th>
+        </tr>
+        {% for cv in cvs %}
+        <tr>
+            <td>{{ cv.id }}</td>
+            <td>{{ cv.personal_info.name }}</td>
+            <td>
+                <a href="{% url 'view_cv' cv.id %}">
+                    <button>View</button>
+                </a>
+                <form action="{% url 'delete_cv' cv.id %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

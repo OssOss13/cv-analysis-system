@@ -1,0 +1,22 @@
+# Ignore environment variables
+.env
+
+# Ignore Python cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore virtual environment
+venv/
+*.egg-info/
+
+# Ignore database files (if using SQLite)
+db.sqlite3
+
+# Ignore media files (optional)
+media/
+
+# Ignore logs and temp files
+*.log
+.DS_Store

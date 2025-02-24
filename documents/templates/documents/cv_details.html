@@ -1,0 +1,45 @@
+<h2>CV Details</h2>
+
+<h3>Personal Information</h3>
+<p><strong>Name:</strong> {{ cv.personal_info.name }}</p>
+<p><strong>Email:</strong> {{ cv.personal_info.email }}</p>
+<p><strong>Phone:</strong> {{ cv.personal_info.phone }}</p>
+<p><strong>LinkedIn:</strong> {{ cv.personal_info.linkedin }}</p>
+<p><strong>GitHub:</strong> {{ cv.personal_info.github }}</p>
+
+<h3>Work Experience</h3>
+<ul>
+    {% for exp in cv.work_experience.all %}
+        <li>{{ exp.job_title }}</li>
+    {% endfor %}
+</ul>
+
+<h3>Education</h3>
+<ul>
+    {% for edu in cv.education.all %}
+        <li>{{ edu.degree }}</li>
+    {% endfor %}
+</ul>
+
+<h3>Projects</h3>
+<ul>
+    {% for proj in cv.projects.all %}
+        <li>{{ proj.title }}</li>
+    {% endfor %}
+</ul>
+
+<h3>Certifications</h3>
+<ul>
+    {% for cert in cv.certifications.all %}
+        <li>{{ cert.name }}</li>
+    {% endfor %}
+</ul>
+
+<h3>Skills</h3>
+<ul>
+    {% for skill in cv.skills.all %}
+        <li>{{ skill.name }}</li>
+    {% endfor %}
+</ul>
+
+<a href="{% url 'list_cvs' %}">Back to CV List</a>

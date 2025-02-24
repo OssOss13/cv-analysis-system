@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .chat-container {
+            width: 50%;
+            max-width: 600px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .messages {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #fafafa;
+        }
+        .message {
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 5px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        .user {
+            background-color: #007bff;
+            color: #fff;
+            align-self: flex-end;
+            text-align: right;
+            margin-left: auto;
+        }
+        .bot {
+            background-color: #e1ffe1;
+            align-self: flex-start;
+            text-align: left;
+            margin-right: auto;
+        }
+        .input-container {
+            display: flex;
+            gap: 5px;
+        }
+        input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <h2>Chatbot</h2>
+        <div class="messages" id="messages"></div>
+        <div class="input-container">
+            <input type="text" id="userInput" placeholder="Type a message..." onkeypress="handleKeyPress(event)" />
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const userId = "user_" + Math.random().toString(36).substr(2, 9);  // Generate a unique user ID
+
+        function sendMessage() {
+            let userInput = document.getElementById("userInput").value.trim();
+            if (!userInput) return;
+
+            let messagesDiv = document.getElementById("messages");
+            messagesDiv.innerHTML += `<div class="message user">${userInput}</div>`;
+
+            fetch("/chatbot/api/chatbot/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: userInput, user_id: userId }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                messagesDiv.innerHTML += `<div class="message bot">${data.response}</div>`;
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;  // Auto-scroll to the latest message
+            })
+            .catch(error => {
+                messagesDiv.innerHTML += `<div class="message bot" style="color: red;">Error: ${error.message}</div>`;
+            });
+
+            document.getElementById("userInput").value = "";
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        }
+    </script>
+
+</body>
+</html>

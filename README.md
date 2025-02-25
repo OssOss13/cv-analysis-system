@@ -16,8 +16,8 @@ This is a Django-based system for analyzing CVs, extracting relevant information
 ### Installation
 
 1. **Clone the repository**:
-  - git clone https://github.com/OssOss13/cv-analysis-system.git
-  - cd cv-analysis-system
+   - git clone https://github.com/OssOss13/cv-analysis-system.git
+   - cd cv-analysis-system
 
 
 2. **Set up a virtual environment**
@@ -45,4 +45,4 @@ This is a Django-based system for analyzing CVs, extracting relevant information
    - python manage.py runserver
 
 10. **Access the application**
-   - Open http://127.0.0.1:8000/ in your browser.
+    - Open http://127.0.0.1:8000/ in your browser.

@@ -1,15 +1,15 @@
-import traceback
 import json
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+from rag.agent import invoke_cv_agent
 from .models import Conversation, Message
-from .utils import filter_data_from_db, classify_query_with_gpt, get_all_records_by_candidate, summarize_and_remove_dups, add_context_to_final_message
+import logging
 
+logger = logging.getLogger(__name__)
 
 def chatbot_view(request):
     return render(request, "chatbot/chat.html")
-
 
 @csrf_exempt
 def chatbot_response(request):
@@ -19,9 +19,6 @@ def chatbot_response(request):
             user_message = data.get("message", "")
             user_id = data.get("user_id", "anonymous")
             
-            print(f"User Message: {user_message}")  # Debugging output
-            print(f"User ID: {user_id}")
-
             if not user_message:
                 return JsonResponse({"error": "No message provided"}, status=400)
 
@@ -31,46 +28,57 @@ def chatbot_response(request):
             # Save message to db
             Message.objects.create(conversation=conversation, sender="user", text=user_message)
 
-            # retrieve past 5 messages
-            past_messages = list(conversation.messages.order_by("-timestamp").values("sender", "text")[:5]) # last 5 msgs only
-            formatted_history = [
-                {"role": "user" if msg["sender"] == "user" else "assistant", "content": msg["text"]}
-                for msg in past_messages
-            ]
-            print('----------------------')
-            print(formatted_history)
-            # get relevant info from db
-
-            user_message_lower = user_message.lower()
-            classified_query = classify_query_with_gpt(user_message_lower)
-
-            relevant_data = ''
-
-            if classified_query.startswith("general:"):
-                table_name = classified_query.split(":")[1]
-                relevant_data = get_all_records_by_candidate(table_name)
-
-            elif classified_query.startswith("filter:"):
-                _, keyword, table_name = classified_query.split(":")
-                relevant_data = filter_data_from_db(table_name, keyword)
-
-            # Summarize relevant info 
-            summarized_data = summarize_and_remove_dups(relevant_data)
-
+            # Retrieve last 10 messages for history
+            # We want them in chronological order for the agent
+            previous_messages = conversation.messages.order_by('-timestamp')[:10]
+            # Reverse to get chronological order
+            previous_messages = reversed(previous_messages)
             
-            bot_response = add_context_to_final_message(summarized_data, formatted_history, user_message)
+            chat_history = []
+            for msg in previous_messages:
+                # Skip the current message we just added (it's the last one)
+                # Actually, invoke_cv_agent expects history WITHOUT the current query usually,
+                # or we can handle it. The agent.py says:
+                # "messages": formatted_history + [HumanMessage(content=query)]
+                # So we should NOT include the current message in history.
+                
+                # But we just saved it. So we need to exclude it.
+                if msg.text == user_message and msg.sender == "user":
+                    # This is a bit risky if user sends same message twice.
+                    # Better to just take all messages except the last one?
+                    # But we are iterating a query set.
+                    pass
+                
+                # Let's just rebuild history from DB excluding the very last one we just inserted.
+                # Or simpler: just pass the history. invoke_cv_agent takes query and history.
+                pass
+
+            # Let's re-fetch history properly
+            # Get all messages for this conversation
+            all_messages = conversation.messages.order_by('timestamp')
+            # Exclude the last one (current query)
+            history_messages = all_messages[:len(all_messages)-1]
+            # Take last 10
+            history_messages = history_messages[-10:]
             
-            # save bot response to db
+            chat_history = []
+            for msg in history_messages:
+                chat_history.append({
+                    "sender": msg.sender,
+                    "text": msg.text
+                })
+
+            # Generate response using Agent
+            result = invoke_cv_agent(user_message, chat_history)
+            bot_response = result["answer"]
+            
+            # Save bot response to db
             Message.objects.create(conversation=conversation, sender='bot', text=bot_response)
-
-            # bot_response = 'done'
 
             return JsonResponse({"response": bot_response})
 
         except Exception as e:
-            print("Error:", str(e))  # Debugging output
-            traceback.print_exc()  # Print full error traceback
+            logger.error(f"Error in chatbot_response: {e}", exc_info=True)
             return JsonResponse({"error": str(e)}, status=500)
         
     return JsonResponse({"error": "Invalid request"}, status=400)
-

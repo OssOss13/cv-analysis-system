@@ -1,122 +1,271 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatbot</title>
+    <title>AI HR Assistant</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e9ecef;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            margin: 0;
         }
+
         .chat-container {
-            width: 50%;
-            max-width: 600px;
-            background: #fff;
+            width: 90%;
+            max-width: 800px;
+            height: 80vh;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
             padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #2c3e50;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
+
+        .chat-header h2 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .back-btn {
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .back-btn:hover {
+            opacity: 1;
+        }
+
         .messages {
-            max-height: 300px;
+            flex: 1;
             overflow-y: auto;
-            margin-bottom: 10px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background: #fafafa;
+            padding: 20px;
+            background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
+
         .message {
-            padding: 8px 12px;
-            margin: 5px 0;
-            border-radius: 5px;
-            max-width: 80%;
+            padding: 12px 18px;
+            border-radius: 15px;
+            max-width: 75%;
+            line-height: 1.5;
+            position: relative;
             word-wrap: break-word;
         }
+
         .user {
-            background-color: #007bff;
-            color: #fff;
+            background-color: #3498db;
+            color: white;
             align-self: flex-end;
-            text-align: right;
-            margin-left: auto;
+            border-bottom-right-radius: 5px;
         }
+
         .bot {
-            background-color: #e1ffe1;
+            background-color: white;
+            color: #333;
             align-self: flex-start;
-            text-align: left;
-            margin-right: auto;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            border: 1px solid #eee;
         }
+
         .input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #eee;
             display: flex;
-            gap: 5px;
+            gap: 10px;
         }
+
         input {
             flex: 1;
-            padding: 10px;
+            padding: 15px;
             border: 1px solid #ddd;
-            border-radius: 5px;
+            border-radius: 25px;
+            outline: none;
+            font-size: 1rem;
+            transition: border-color 0.2s;
         }
+
+        input:focus {
+            border-color: #3498db;
+        }
+
         button {
-            padding: 10px;
-            background: #007bff;
+            padding: 10px 25px;
+            background: #2ecc71;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 25px;
             cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
         }
+
         button:hover {
-            background: #0056b3;
+            background: #27ae60;
+        }
+
+        button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-self: flex-start;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 15px;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            margin-bottom: 15px;
+            color: #777;
+            font-style: italic;
+            font-size: 0.9rem;
+        }
+
+        /* Markdown styling for bot messages */
+        .bot ul {
+            padding-left: 20px;
+            margin: 5px 0;
+        }
+
+        .bot p {
+            margin: 5px 0;
+        }
+
+        .bot strong {
+            color: #2c3e50;
         }
     </style>
 </head>
+
 <body>
 
     <div class="chat-container">
-        <h2>Chatbot</h2>
-        <div class="messages" id="messages"></div>
+        <div class="chat-header">
+            <h2>AI HR Assistant</h2>
+            <a href="/documents/list/" class="back-btn">Back to CVs</a>
+        </div>
+
+        <div class="messages" id="messages">
+            <div class="message bot">
+                Hello! I'm your AI HR Assistant. I can help you analyze the uploaded CVs, compare candidates, and answer
+                specific questions about their experience. How can I help you today?
+            </div>
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator">
+            AI is thinking...
+        </div>
+
         <div class="input-container">
-            <input type="text" id="userInput" placeholder="Type a message..." onkeypress="handleKeyPress(event)" />
-            <button onclick="sendMessage()">Send</button>
+            <input type="text" id="userInput" placeholder="Ask about candidates..."
+                onkeypress="handleKeyPress(event)" />
+            <button id="sendBtn" onclick="sendMessage()">Send</button>
         </div>
     </div>
 
     <script>
-        const userId = "user_" + Math.random().toString(36).substr(2, 9);  // Generate a unique user ID
+        const userId = "user_" + Math.random().toString(36).substr(2, 9);
+        const messagesDiv = document.getElementById("messages");
+        const userInput = document.getElementById("userInput");
+        const sendBtn = document.getElementById("sendBtn");
+        const typingIndicator = document.getElementById("typingIndicator");
 
         function sendMessage() {
-            let userInput = document.getElementById("userInput").value.trim();
-            if (!userInput) return;
+            let text = userInput.value.trim();
+            if (!text) return;
 
-            let messagesDiv = document.getElementById("messages");
-            messagesDiv.innerHTML += `<div class="message user">${userInput}</div>`;
+            // Add user message
+            messagesDiv.innerHTML += `<div class="message user">${escapeHtml(text)}</div>`;
+            userInput.value = "";
+            scrollToBottom();
+
+            // Show typing indicator
+            typingIndicator.style.display = "block";
+            userInput.disabled = true;
+            sendBtn.disabled = true;
 
             fetch("/chatbot/api/chatbot/", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: userInput, user_id: userId }),
+                body: JSON.stringify({ message: text, user_id: userId }),
             })
-            .then(response => response.json())
-            .then(data => {
-                messagesDiv.innerHTML += `<div class="message bot">${data.response}</div>`;
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;  // Auto-scroll to the latest message
-            })
-            .catch(error => {
-                messagesDiv.innerHTML += `<div class="message bot" style="color: red;">Error: ${error.message}</div>`;
-            });
+                .then(response => response.json())
+                .then(data => {
+                    typingIndicator.style.display = "none";
+                    userInput.disabled = false;
+                    sendBtn.disabled = false;
+                    userInput.focus();
 
-            document.getElementById("userInput").value = "";
+                    if (data.error) {
+                        messagesDiv.innerHTML += `<div class="message bot" style="color: #e74c3c;">Error: ${data.error}</div>`;
+                    } else {
+                        // Simple formatting for newlines
+                        let formattedResponse = formatResponse(data.response);
+                        messagesDiv.innerHTML += `<div class="message bot">${formattedResponse}</div>`;
+                    }
+                    scrollToBottom();
+                })
+                .catch(error => {
+                    typingIndicator.style.display = "none";
+                    userInput.disabled = false;
+                    sendBtn.disabled = false;
+                    messagesDiv.innerHTML += `<div class="message bot" style="color: #e74c3c;">Network Error: ${error.message}</div>`;
+                    scrollToBottom();
+                });
         }
 
         function handleKeyPress(event) {
-            if (event.key === "Enter") {
+            if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
                 sendMessage();
             }
+        }
+
+        function scrollToBottom() {
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function formatResponse(text) {
+            // Basic formatting: convert newlines to <br> and bold **text**
+            let formatted = escapeHtml(text);
+            formatted = formatted.replace(/\n/g, '<br>');
+            formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            return formatted;
         }
     </script>
 
 </body>
+
 </html>

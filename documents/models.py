@@ -1,56 +1,56 @@
+from sqlalchemy.sql._elements_constructors import null
 from django.db import models
 import os
+from django.contrib.auth.models import User
 
 class CV(models.Model):
     file = models.FileField(upload_to="cvs/")
+    uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="cvs", null=True)
+    original_filename = models.CharField(max_length=255, null=True)
+    file_size = models.IntegerField(help_text="File size in bytes", null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
-
+    is_processed = models.BooleanField(default=False)
+    processing_error = models.TextField(blank=True, null=True)
+    
+    class Meta:
+        ordering = ['-uploaded_at']
+        verbose_name = "CV"
+        verbose_name_plural = "CVs"
+    
     def __str__(self):
-        return self.file.name
+        return f"{self.original_filename} ({self.uploaded_by.username})"
     
     def delete(self, *args, **kwargs):
-        # Delete the file from the filesystem before deleting the model instance
+        # Delete from vectorstore before deleting the model
+        from rag.vectorstore import delete_cv_from_vectorstore
+        delete_cv_from_vectorstore(self.id)
+        
+        # Delete the file from filesystem
         if self.file:
             if os.path.isfile(self.file.path):
                 os.remove(self.file.path)
         super().delete(*args, **kwargs)
 
-class PersonalInfo(models.Model):
-    cv = models.OneToOneField(CV, on_delete=models.CASCADE, related_name='personal_info')
-    name = models.CharField(max_length=255, null=True, blank=True)
-    email = models.CharField(max_length=255, null=True, blank=True)
-    phone = models.CharField(max_length=50, null=True, blank=True)
-    linkedin = models.URLField(null=True, blank=True)
-    github = models.URLField(null=True, blank=True)
-
-class WorkExperience(models.Model):
-    cv = models.ForeignKey(CV, on_delete=models.CASCADE, related_name='work_experience')
-    job_title = models.CharField(max_length=255, null=True, blank=True)
-    company = models.CharField(max_length=50, null=True, blank=True)
-    duration = models.CharField(max_length=50, null=True)
-    location = models.CharField(max_length=100, null=True, blank=True)
-
-
-class Education(models.Model):
-    cv = models.ForeignKey(CV, on_delete=models.CASCADE, related_name='education')
-    institution = models.CharField(max_length=255, null=True)
-    degree = models.CharField(max_length=255, null=True)
-    duration = models.CharField(max_length=50, null=True, blank=True)
-    location = models.CharField(max_length=100, null=True, blank=True)
-
-
-class Project(models.Model):
-    cv = models.ForeignKey(CV, on_delete=models.CASCADE, related_name='projects')
-    title = models.CharField(max_length=255, null=True)
-    description = models.TextField(null=True, max_length=255)
-
-class Certification(models.Model):
-    cv = models.ForeignKey(CV, on_delete=models.CASCADE, related_name='certifications')
-    name = models.CharField(max_length=255, null=True)
-    issuer = models.CharField(max_length=255, null=True, blank=True)
-    year = models.CharField(max_length=50, null=True, blank=True)
-    description = models.TextField(null=True, max_length=255)
-
-class Skill(models.Model):
-    cv = models.ForeignKey(CV, on_delete=models.CASCADE, related_name='skills')
-    name = models.CharField(max_length=100)
+class CVSummary(models.Model):
+    cv = models.OneToOneField(CV, on_delete=models.CASCADE, related_name="summary")
+    summary_json = models.JSONField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    # Cache commonly accessed fields for faster queries
+    candidate_name = models.CharField(max_length=255, blank=True, null=True)
+    years_experience = models.FloatField(blank=True, null=True)
+    
+    class Meta:
+        verbose_name = "CV Summary"
+        verbose_name_plural = "CV Summaries"
+    
+    def __str__(self):
+        return f"Summary for {self.cv.original_filename}"
+    
+    def save(self, *args, **kwargs):
+        # Auto-populate cached fields from JSON
+        if self.summary_json:
+            self.candidate_name = self.summary_json.get('name')
+            self.years_experience = self.summary_json.get('years_experience')
+        super().save(*args, **kwargs)

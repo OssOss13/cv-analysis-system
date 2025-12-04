@@ -1,48 +1,80 @@
 # CV Analysis System
 
-This is a Django-based system for analyzing CVs, extracting relevant information, and enabling chatbot-based querying.
+An intelligent Hiring Assistant powered by RAG (Retrieval Augmented Generation) and LangChain. This system allows HR professionals to upload CVs, automatically extract and summarize insights, and interact with an AI agent to evaluate and compare candidates.
 
-## Features
-- Upload and parse CVs
-- Store extracted information in a database
-- Query CV data using a chatbot interface
+## 🚀 Features
 
-## Setup Instructions
+- **CV Ingestion & Processing**: Upload PDF CVs which are automatically processed, summarized, and indexed for search.
+- **Intelligent HR Agent**: A conversational AI that acts as an expert HR assistant.
+- **Candidate Comparison**: Ask the agent to compare multiple candidates based on specific criteria (e.g., "Who has the most experience with Django?").
+- **Deep Dive Analysis**: Query specific details about a candidate's experience, education, or skills.
+- **RAG-Powered**: Uses Vector Search (ChromaDB) to retrieve accurate information from candidate documents, ensuring the AI answers based on facts, not hallucinations.
 
-### Prerequisites
-- Python 3.8+ installed
-- `pip` installed
+## 🛠️ Tech Stack
 
-### Installation
+- **Language**: Python 3.11+
+- **Framework**: Django
+- **AI/LLM**: LangChain, OpenAI GPT
+- **Vector Store**: ChromaDB
+- **Dependency Management**: Poetry
 
-1. **Clone the repository**:
-   - git clone https://github.com/OssOss13/cv-analysis-system.git
-   - cd cv-analysis-system
+## 📦 Installation
 
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd cv-analysis-system
+   ```
 
-2. **Set up a virtual environment**
-   - python -m venv venv
-   - source venv/bin/activate  
-   - On Windows use: venv\Scripts\activate
+2. **Install Dependencies**
+   This project uses [Poetry](https://python-poetry.org/) for dependency management.
+   ```bash
+   poetry install
+   ```
 
-3. **Install Tesseract OCR**
-   - Install from https://github.com/UB-Mannheim/tesseract/wiki
-   - Add it to your system PATH like: C:\Program Files\Tesseract-OCR
+3. **Environment Setup**
+   Create a `.env` file in the root directory (or copy from example if available) and add your API keys:
+   ```env
+   OPENAI_API_KEY=your_openai_api_key_here
+   # Add other necessary variables if any
+   ```
 
-5. **Install dependencies**
-   - pip install -r requirements.txt
+4. **Database Migration**
+   Initialize the SQLite database and vector store settings.
+   ```bash
+   poetry run python manage.py migrate
+   ```
 
-6. **Set up environment variables**
-   - Copy .env.example to .env and update values.
+## 🏃‍♂️ Usage
 
-7. **Run database migrations**
-   - python manage.py migrate
+1. **Start the Development Server**
+   ```bash
+   poetry run python manage.py runserver
+   ```
 
-8. **Create a superuser (optional, for admin access)**
-   - python manage.py createsuperuser
+2. **Access the Application**
+   Open your browser and navigate to `http://localhost:8000`.
 
-9. **python manage.py runserver**
-   - python manage.py runserver
+3. **Workflow**
+   - **Upload**: Go to the documents section to upload candidate CVs.
+   - **Process**: The system will ingest and index the documents.
+   - **Chat**: Navigate to the Chatbot interface.
+   - **Interact**:
+     - *Comparative*: "Compare the candidates based on their Python experience."
+     - *Specific*: "Does Candidate X have any leadership experience?"
+     - *Discovery*: "Find me a candidate with strong background in Finance."
 
-10. **Access the application**
-    - Open http://127.0.0.1:8000/ in your browser.
+## 🤖 Agent Capabilities
+
+The agent is equipped with specialized tools:
+- `search_cv_summaries`: For high-level comparisons and ranking.
+- `search_cv_details`: For extracting specific evidence from a candidate's full CV.
+- `list_all_cvs`: To see who is currently in the system.
+
+## 🤝 Contributing
+
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request

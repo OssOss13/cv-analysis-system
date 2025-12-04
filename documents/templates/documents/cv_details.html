@@ -1,44 +1,58 @@
 <h2>CV Details</h2>
 
 <h3>Personal Information</h3>
-<p><strong>Name:</strong> {{ cv.personal_info.name }}</p>
-<p><strong>Email:</strong> {{ cv.personal_info.email }}</p>
-<p><strong>Phone:</strong> {{ cv.personal_info.phone }}</p>
-<p><strong>LinkedIn:</strong> {{ cv.personal_info.linkedin }}</p>
-<p><strong>GitHub:</strong> {{ cv.personal_info.github }}</p>
+{% if personal_info %}
+    <p><strong>Name:</strong> {{ personal_info.name }}</p>
+    <p><strong>Email:</strong> {{ personal_info.email }}</p>
+    <p><strong>Phone:</strong> {{ personal_info.phone }}</p>
+    <p><strong>LinkedIn:</strong> {{ personal_info.linkedin }}</p>
+    <p><strong>GitHub:</strong> {{ personal_info.github }}</p>
+{% else %}
+    <p>No personal information available.</p>
+{% endif %}
 
 <h3>Work Experience</h3>
 <ul>
-    {% for exp in cv.work_experience.all %}
-        <li>{{ exp.job_title }}</li>
+    {% for exp in work_experience %}
+        <li>{{ exp }}</li>
+    {% empty %}
+        <li>No work experience found.</li>
     {% endfor %}
 </ul>
 
 <h3>Education</h3>
 <ul>
-    {% for edu in cv.education.all %}
-        <li>{{ edu.degree }}</li>
-    {% endfor %}
-</ul>
-
-<h3>Projects</h3>
-<ul>
-    {% for proj in cv.projects.all %}
-        <li>{{ proj.title }}</li>
-    {% endfor %}
-</ul>
-
-<h3>Certifications</h3>
-<ul>
-    {% for cert in cv.certifications.all %}
-        <li>{{ cert.name }}</li>
+    {% for edu in education %}
+        <li>{{ edu }}</li>
+    {% empty %}
+        <li>No education details found.</li>
     {% endfor %}
 </ul>
 
 <h3>Skills</h3>
 <ul>
-    {% for skill in cv.skills.all %}
-        <li>{{ skill.name }}</li>
+    {% for skill in skills %}
+        <li>{{ skill }}</li>
+    {% empty %}
+        <li>No skills listed.</li>
+    {% endfor %}
+</ul>
+
+<h3>Projects</h3>
+<ul>
+    {% for proj in projects %}
+        <li>{{ proj }}</li>
+    {% empty %}
+        <li>No projects found.</li>
+    {% endfor %}
+</ul>
+
+<h3>Certifications</h3>
+<ul>
+    {% for cert in certifications %}
+        <li>{{ cert }}</li>
+    {% empty %}
+        <li>No certifications listed.</li>
     {% endfor %}
 </ul>
 

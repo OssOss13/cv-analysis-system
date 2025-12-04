@@ -14,14 +14,10 @@ def upload_cv(request):
         if form.is_valid():
             cv = form.save()
             
-            # Process CV for RAG
-            try:
-                ingest_cv_by_id(cv.id)
-                logger.info(f"Successfully ingested CV {cv.id}")
-            except Exception as e:
-                logger.error(f"Error ingesting CV {cv.id}: {e}")
-                # We could add a message here, but for now just log it
-                pass
+            # Process CV for RAG (Async)
+            from documents.tasks import process_cv_task
+            process_cv_task.delay(cv.id)
+            logger.info(f"Queued CV {cv.id} for background processing")
 
             return redirect("view_cv", cv_id=cv.id)
     else:

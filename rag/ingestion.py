@@ -5,11 +5,12 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 import os
 import uuid
-from rag.summaries import generate_cv_summary
+from rag.chains.summaries import generate_cv_summary
 from documents.models import CV
 import logging
 from documents.models import CVSummary
 
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 def save_cv(uploaded_file):
@@ -52,7 +53,7 @@ def chunk_documents(pages, chunk_size=1000, chunk_overlap=200):
     return splitter.split_documents(pages)
 
 
-def ingest_cv_by_id(cv_id: int, user_id: int = None):
+def ingest_cv_and_create_summary_by_id(cv_id: int):
     """
     Master ingestion function for a CV already saved as a CV model.
     This will:
@@ -170,5 +171,8 @@ def format_summary_for_embedding(summary_model, cv_filename: str) -> str:
     
     if summary_model.work_history:
         parts.append(f"Work History: {' | '.join(summary_model.work_history)}")
+
+    if summary_model.emails:
+        parts.append(f"Emails: {' | '.join(summary_model.emails)}")
     
     return "\n".join(parts)

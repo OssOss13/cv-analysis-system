@@ -1,0 +1,34 @@
+{% extends 'positions/base.html' %}
+
+{% block title %}Login - CV Analysis System{% endblock %}
+
+{% block content %}
+<div
+    style="max-width: 400px; margin: 50px auto; padding: 30px; border: 1px solid #ddd; border-radius: 8px; background: #fff;">
+    <h2 style="text-align: center; margin-top: 0;">Login</h2>
+    <form method="post">
+        {% csrf_token %}
+        {% if form.errors %}
+        <div class="alert alert-error">
+            Your username and password didn't match. Please try again.
+        </div>
+        {% endif %}
+
+        <div class="form-group">
+            <label for="id_username">Username</label>
+            {{ form.username }}
+        </div>
+
+        <div class="form-group">
+            <label for="id_password">Password</label>
+            {{ form.password }}
+        </div>
+
+        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Login</button>
+        <input type="hidden" name="next" value="{{ next }}">
+    </form>
+    <div style="margin-top: 15px; text-align: center;">
+        Don't have an account? <a href="{% url 'register' %}">Register here</a>.
+    </div>
+</div>
+{% endblock %}

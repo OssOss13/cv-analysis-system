@@ -7,13 +7,19 @@ from .models import Conversation, Message
 import logging
 from .utils import get_chat_user
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import user_passes_test
 
 logger = logging.getLogger(__name__)
 
+def is_admin(user):
+    return user.is_authenticated and user.is_staff
+
+@user_passes_test(is_admin)
 def chatbot_view(request):
     return render(request, "chatbot/chat.html")
 
 @csrf_exempt
+@user_passes_test(is_admin)
 def chatbot_response(request):
     if request.method == "POST":
         try:

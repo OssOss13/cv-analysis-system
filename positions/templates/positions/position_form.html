@@ -1,0 +1,44 @@
+{% extends 'positions/base.html' %}
+
+{% block title %}{{ action }} Position - CV Analysis System{% endblock %}
+
+{% block content %}
+<h1>{{ action }} Position</h1>
+
+<div
+    style="background: #fff; padding: 30px; border-radius: 8px; border: 1px solid #eee; max-width: 800px; margin: 0 auto;">
+    <form method="post">
+        {% csrf_token %}
+
+        {% if form.errors %}
+        <div class="alert alert-error">
+            <strong>Error:</strong> Please correct the errors below.
+            {{ form.errors }}
+        </div>
+        {% endif %}
+
+        {% for field in form %}
+        <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}
+            <small style="color: #666;">{{ field.help_text }}</small>
+            {% endif %}
+            {% if field.errors %}
+            <div style="color: #e74c3c; font-size: 0.9em; margin-top: 5px;">
+                {{ field.errors }}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <div style="margin-top: 30px; display: flex; gap: 10px;">
+            <button type="submit" class="btn-primary">Save Position</button>
+            <a
+                href="{% if form.instance.pk %}{% url 'position_detail' form.instance.pk %}{% else %}{% url 'position_list' %}{% endif %}">
+                <button type="button" class="btn-secondary" style="background-color: #95a5a6;">Cancel</button>
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

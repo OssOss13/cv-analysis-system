@@ -1,0 +1,79 @@
+{% extends 'positions/base.html' %}
+
+{% block title %}Open Positions - CV Analysis System{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h1 style="margin-bottom: 0; border-bottom: none;">Open Positions</h1>
+    {% if user.is_staff %}
+    <a href="{% url 'position_create' %}">
+        <button class="btn-primary">+ Create Position</button>
+    </a>
+    {% endif %}
+</div>
+
+<div style="background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #eee; margin-bottom: 30px;">
+    <form method="get" style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <input type="text" name="q" placeholder="Search positions, skills..." value="{{ request.GET.q|default:'' }}"
+            style="flex: 2; min-width: 200px;">
+
+        <select name="seniority" style="flex: 1; min-width: 150px;">
+            <option value="">All Seniority Levels</option>
+            {% for code, name in seniority_choices %}
+            <option value="{{ code }}" {% if request.GET.seniority|default:"" == code %} selected {% endif %}>{{ name }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <input type="text" name="location" placeholder="Location" value="{{ request.GET.location|default:'' }}"
+            style="flex: 1; min-width: 150px;">
+
+        <button type="submit" class="btn-primary">Filter</button>
+        {% if request.GET.q or request.GET.seniority or request.GET.location %}
+        <a href="{% url 'position_list' %}" class="btn-secondary"
+            style="display: flex; align-items: center; justify-content: center;">Clear</a>
+        {% endif %}
+    </form>
+</div>
+
+{% if positions %}
+<div style="display: grid; gap: 20px;">
+    {% for position in positions %}
+    <div
+        style="border: 1px solid #eee; padding: 20px; border-radius: 8px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+                <h2 style="margin-top: 0;"><a href="{% url 'position_detail' position.pk %}"
+                        style="text-decoration: none; color: #2c3e50;">{{ position.title }}</a></h2>
+                <div class="meta-info">
+                    <span class="badge badge-{{ position.seniority|lower }}">{{ position.seniority }}</span>
+                    <span style="margin-left: 10px;">📍 {{ position.location }}</span>
+                    <span style="margin-left: 10px;">💼 {{ position.employment_type }}</span>
+                    {% if position.is_remote %}
+                    <span style="margin-left: 10px;">🏠 Remote</span>
+                    {% endif %}
+                </div>
+            </div>
+            <a href="{% url 'position_detail' position.pk %}">
+                <button class="btn-secondary">View Details</button>
+            </a>
+        </div>
+        <p style="color: #666; margin-top: 15px; line-height: 1.5;">
+            {{ position.description|truncatewords:30 }}
+        </p>
+        <div style="margin-top: 15px; font-size: 0.9em; color: #888;">
+            Posted on {{ position.created_at|date:"M d, Y" }}
+            {% if position.closing_date %}
+            | Closes: {{ position.closing_date|date:"M d, Y" }}
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div style="text-align: center; padding: 50px; color: #777; background: #f9f9f9; border-radius: 8px;">
+    <h3>No open positions at the moment.</h3>
+    <p>Please check back later.</p>
+</div>
+{% endif %}
+{% endblock %}

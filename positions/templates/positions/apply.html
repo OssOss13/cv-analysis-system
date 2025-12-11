@@ -1,0 +1,39 @@
+{% extends 'positions/base.html' %}
+
+{% block title %}Apply for {{ position.title }} - CV Analysis System{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 20px;">
+    <a href="{% url 'position_detail' position.pk %}" style="color: #777; text-decoration: none;">&larr; Back to
+        Position Details</a>
+</div>
+
+<h1>Apply for {{ position.title }}</h1>
+
+<div style="background: #fff; padding: 30px; border-radius: 8px; border: 1px solid #eee; max-width: 600px;">
+    <p style="margin-bottom: 20px; color: #555;">
+        Please upload your CV to apply for this position. The system will automatically analyze your CV and match it
+        against the job requirements.
+    </p>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {% if form.errors %}
+        <div class="alert alert-error">
+            <strong>Error:</strong> Please correct the errors below.
+            {{ form.errors }}
+        </div>
+        {% endif %}
+
+        <div class="form-group">
+            <label for="id_file">Upload CV (PDF only)</label>
+            {{ form.file }}
+        </div>
+
+        <div style="margin-top: 30px;">
+            <button type="submit" class="btn-primary" style="width: 100%;">Submit Application</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

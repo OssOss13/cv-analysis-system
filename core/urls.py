@@ -21,9 +21,10 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('documents.urls')),
-    path("chatbot/", include("chatbot.urls")),
-    
+    path('accounts/', include('django.contrib.auth.urls')),  # Login/Logout
+    path('', include('positions.urls')), # Make positions the home page
+    path('documents/', include('documents.urls')),
+    path("chatbot/", include("chatbot.urls")),    
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

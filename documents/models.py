@@ -11,7 +11,8 @@ class CV(models.Model):
     uploaded_at = models.DateTimeField(auto_now_add=True)
     is_processed = models.BooleanField(default=False)
     processing_error = models.TextField(blank=True, null=True)
-    
+    file_hash = models.CharField(max_length=64, db_index=True, null=True)
+
     class Meta:
         ordering = ['-uploaded_at']
         verbose_name = "CV"
@@ -40,6 +41,7 @@ class CVSummary(models.Model):
     # Cache commonly accessed fields for faster queries
     candidate_name = models.CharField(max_length=255, blank=True, null=True)
     years_experience = models.FloatField(blank=True, null=True)
+    emails = models.JSONField(blank=True, null=True)
     
     class Meta:
         verbose_name = "CV Summary"
@@ -53,4 +55,5 @@ class CVSummary(models.Model):
         if self.summary_json:
             self.candidate_name = self.summary_json.get('name')
             self.years_experience = self.summary_json.get('years_experience')
+            self.emails = self.summary_json.get('emails')
         super().save(*args, **kwargs)

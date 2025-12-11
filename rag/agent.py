@@ -6,7 +6,7 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain_core.agents import AgentFinish
 from langgraph.prebuilt import create_react_agent
 from rag.tools import search_cv_summaries, search_cv_details, list_all_cvs
-from rag.chains import get_llm
+from rag.chains.llm import get_llm
 
 logger = logging.getLogger(__name__)
 

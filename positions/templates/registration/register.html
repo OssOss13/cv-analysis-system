@@ -1,0 +1,29 @@
+{% extends 'positions/base.html' %}
+
+{% block title %}Register - CV Analysis System{% endblock %}
+
+{% block content %}
+<div
+    style="max-width: 400px; margin: 50px auto; padding: 30px; border: 1px solid #ddd; border-radius: 8px; background: #fff;">
+    <h2 style="text-align: center; margin-top: 0;">Register</h2>
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}
+            <p class="help-text" style="font-size: 0.8em; color: #666;">{{ field.help_text }}</p>
+            {% endif %}
+            {% for error in field.errors %}
+            <div style="color: red; font-size: 0.9em;">{{ error }}</div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 20px;">Register</button>
+    </form>
+    <div style="margin-top: 15px; text-align: center;">
+        Already have an account? <a href="{% url 'login' %}">Login here</a>.
+    </div>
+</div>
+{% endblock %}
